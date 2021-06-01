@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+
+<title>Spotify Rewind 2020</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Load d3.js -->
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/spin.js/2.0.1/spin.min.js'></script>
+<script src="index.js"></script>
+
+<head>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #1ab26b;
+            margin:0;
+            padding:0;
+        }
+
+        .axis {
+            /* font: 15px sans-serif; */
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: #97999B;
+            stroke-width: 1px;
+            shape-rendering: crispEdges;
+        }
+
+
+
+        .toolTip {
+            position: absolute;
+            display: none;
+            min-width: 120px;
+            height: auto;
+            background: none repeat scroll 0 0 #ffffff;
+            border: 1px solid #6F257F;
+            padding: 14px;
+            text-align: center;
+            color: #000000;
+            font-family: 'Montserrat', sans-serif;
+
+        
+        }
+
+        .scatter_toolTip{
+             position: absolute;
+            display: none;
+            min-width: 120px;
+            height: auto;
+            background: none repeat scroll 0 0 #ffffff;
+            border: 1px solid #6F257F;
+            padding: 14px;
+            text-align: center;
+            color: #000000;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .charts{
+		margin:10px 10px;
+        }
+
+        .chart_title{
+            font-family: Helvetica;
+            font-size:20px;
+            font-weight:bold;
+            border-radius: 3px;
+            /*text-align: center;*/
+            background-color: #100e12;
+            border: 2px solid #030303;
+            color: #ffffff;
+            margin: 0 auto;
+            padding-left:20px;
+            max-height: 50px;
+        }
+
+        .chart_title_text{
+            vertical-align:middle;
+        }
+
+        #dashboard_title{
+            background-color: #000000;
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+            background-size: cover;
+        }
+
+        #dashboard_title_text{
+            font-size: 80px;
+            font-family: monospace;
+            font-weight: bold;
+            
+        }
+
+        #slider-range{
+            vertical-align:middle;
+            margin-top:5px;
+        }
+        iframe{
+            border:2px solid rgb(0, 0, 0);
+        }
+        .line {
+        fill: none;
+        stroke: #1ab26b;
+        stroke-width: 2px;
+        }
+
+        .overlay {
+        fill: none;
+        pointer-events: all;
+        }
+
+        .focus circle {
+        fill: #F1F3F3;
+        stroke: #1ab26b;
+        stroke-width: 5px;
+        }
+        
+        .hover-line {
+        stroke: #1ab26b;
+        stroke-width: 2px;
+        stroke-dasharray: 3,3;}
+    </style>
+</head>
+
+<body>
+
+
+</body>
+<!-- Create a div where the graph will take place -->
+<div id="dashboard_title"><span id="dashboard_title_text"><img src="spotify.png" alt="spotify" width = "45%" height = '45%'>&ensp;
+    &ensp;
+</span>
+<iframe></iframe>
+</div>
+<section id='chart'>
+<div style="display:flex;width:95%;height:400px;margin:0 auto; margin-bottom: 30px;">
+    <div class="charts" style="width:45%; height:100%;">
+        <div class="chart_title" style="height:10%"><span id='scatterid' class="chart_title_text">Artist's Number of Unique Songs and Total
+                Streams in Global</span></div>
+        <div style="height:90%;width:100%;display:flex">
+            <div id="scatterplot" style="width:100%; height:100%; background-color: #f0f4f3;"></div>
+        </div>
+    </div>
+    <div class="charts" style="width:55%; height:100%;">
+        <div class="chart_title" style="height:10%"><span id= 'mapid' class="chart_title_text">Total Streams in Different Regions</span>
+        </div>
+        <div style="height:90%;width:100%;display:flex">
+            <img src="legend.png" alt="legend" height = '99%'>
+            <div id="map" style="width:100%; height:99%; background-color: #3d3d3d;"></div>
+
+        </div>
+    </div>
+    <!-- <div class="charts" style="width:42%;height:100%">
+        <div class="chart_title" style="height:10%"><span class="chart_title_text">Top 15 Artists</span></div>
+        <div id="barchart" style="width:100%;height:90%"></div>
+    </div> -->
+    <!-- <div class="charts" style="width:42%;height:100%">
+        <div class="chart_title" style="height:10%"><span class="chart_title_text">Top 15 Songs</span></div>
+        <div id="trackview" style="width:100%;height:90%"></div>
+    </div> -->
+
+</div>
+
+<div style="display:flex;width:95%;height:400px;margin:0 auto; margin-bottom: 30px;">
+    <div class="charts" style="width:50%;height:100%">
+        <div class="chart_title" style="height:10%"><span id='artistid' class="chart_title_text">Top 15 Artists in Global</span></div>
+        <div id="barchart" style="width:100%;height:90%; background-color: #f0f4f3;"></div>
+    </div>
+    <div class="charts" style="width:50%;height:100%">
+        <div class="chart_title" style="height:10%"><span id='topsongid' class="chart_title_text">Top 15 Songs in Global</span></div>
+        <div id="trackview" style="width:100%; height:90%; background-color: #f0f4f3;"></div>
+    </div>
+</div>
+
+<div style="display:flex;width:95%;height:400px;margin:0 auto; margin-bottom: 30px;">
+    <div class="charts" style="width:100%;height:100%">
+        <div class="chart_title" style="height:10%"><span id='timeseriesid' class="chart_title_text">Total Streams in 2020 in Global</span></div>
+        <div id="timeseries" style="width:100%; height:90%; background-color: #f0f4f3;"></div>
+    </div>
+</div>
+</section>
+
+
+<!-- <body>
+    <div id="dashboard_title"><span id="dashboard_title_text">The Nature of Terrorism</span></div>
+    <div id="loadingbar">Loading Data...</div>
+    <div id="jason">
+        <div style="margin-left:40px;font-size:30px">
+            <label for="amount">Year range : </label>
+            <input type="text" id="amount" readonly style="font-size:30px;border:0; color:#f6931f; font-weight:bold;">
+        </div>
+        <div style="display:flex;margin-left:40px">
+            <span style="margin-right:30px;font-size:20px">CHANGE YEAR RANGE: </span>
+            <div id="slider-range"></div>
+        </div>
+
+        <div style="display:flex;width:95%;height:400px;margin:0 auto; margin-bottom: 30px;">
+            <div class="charts" style="width:55%; height:100%;">
+                <div class="chart_title" style="height:10%"><span class="chart_title_text">Frequency of Terrorism Over
+                        the World</span></div>
+                <div style="height:90%;width:100%;display:flex">
+                    <div id="choropleth" style="width:100%; height:100%;"></div>
+                    <div id="choropleth_legend" style="margin-left:0"></div>
+                </div>
+            </div>
+            <div class="charts" style="width:42%;height:100%">
+                <div class="chart_title" style="height:10%"><span class="chart_title_text">Number of People Killed by
+                        Year</span></div>
+                <div id="barchart" style="width:100%;height:90%"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <div style="display:flex;width:94%; height:500px;margin:0 auto;margin-bottom: 30px;">
+        <div class="charts" style="width: 65%;height:100%">
+            <div class="chart_title" style="height:10%"><span class="chart_title_text">Amount of Victims Caused by Each
+                    Group by Year</span></div>
+            <div id="bubblechart" style="width:100%; height:90%">
+                </>
+            </div>
+        </div>
+        <div class="charts" style="width:35%; height:100%">
+            <div class="chart_title" style="height:10%"><span class="chart_title_text">Amount of Victims Caused by Each
+                    Group</span></div>
+            <div id="waynebubble" style="width:100%; height:90%"></div>
+        </div>
+    </div>
+
+    <div style="display:flex;width:95%;height:500px;margin:0 auto;margin-bottom: 30px;">
+        <div class="charts" style="width:45%; height:100%">
+            <div class="chart_title" style="height:10%"><span class="chart_title_text">Popular Targets by Each
+                    Group</span></div>
+            <div id="chart" style="width:100%; height:90%"></div>
+        </div>
+        <div style="width:50%; height:100%">
+            <div class="charts" style="width:100%; height:100%">
+                <div class="chart_title" style="height:10%"><span class="chart_title_text">Number of People Killed by
+                        Year by ideology</span></div>
+                <div style="display:flex;width:100%; height:90%">
+                    <div id="streamgraph" style="width:100%; height:100%; margin-right:0px"></div>
+                    <div id="streamgraph_legend" style="margin-left:0px"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body> -->
